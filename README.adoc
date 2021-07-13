@@ -23,11 +23,15 @@ ifdef::env-github[]
 <p align="center">
   <img  alt="Humidity Sensor" src="pics/Humidity Sensor Top.jpg?raw=true"/>
 </p>
+<p align="center">
+  <img  alt="Humidity Sensor Demo" src="pics/Humidity Sensor Demo.gif?raw=true"/>
+</p>
 ++++
 endif::[]
 
 ifndef::env-github[]
 image::pics/Humidity Sensor Top.jpg[Humidity Sensor, align=center]
+image::pics/Humidity Sensor Demo.gif[Humidity Sensor Demo, align=center]
 endif::[]
 
 == Hardware

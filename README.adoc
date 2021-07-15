@@ -65,6 +65,7 @@ I'm hoping to get closer to a week's worth of life out of a single battery life.
 Improvements to energy efficiency include the following.
 +
 .Power Optimizations
+- [ ] Lower the clock speed.
 - [ ] Store sensor readings with Direct Memory Access, aka _DMA_, to avoid waking the microcontroller as frequently.
 Unfortunately, I don't believe this functionality is available in CircuitPython at this time.
 - [ ] Put the RP2040 into deep sleep, waking only to refresh the screen.

@@ -26,6 +26,7 @@
         "repos",
         "sramcs",
         "srcs",
+        "struct",
         "udisksctl",
         "unmount",
         "usermod",

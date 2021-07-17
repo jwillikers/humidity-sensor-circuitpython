@@ -1,15 +1,23 @@
+import struct
 import time
 import alarm
 import board
-import busio
 import digitalio
+import microcontroller
 import neopixel_write
+import adafruit_fram
 import adafruit_htu31d
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.ssd1680 import Adafruit_SSD1680  # pylint: disable=unused-import
 
 
 NUMBER_OF_SAMPLES = 300
+STRUCT_FORMAT = ("i" + "d" * 300) * 2
+FIRST_WAKE = (
+    alarm.wake_alarm
+    is None
+    # microcontroller.cpu.reset_reason != microcontroller.ResetReason.DEEP_SLEEP_ALARM
+)
 
 
 def disable_led(led_pin):
@@ -25,12 +33,10 @@ def median(numbers):
 
 
 def zero_values(values):
-    return [None for i in range(len(values))]
+    return [0 for i in range(len(values))]
 
 
-def initialize_display():
-    spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-    ecs = digitalio.DigitalInOut(board.D9)
+def initialize_display(spi_bus, ecs):
     dc = digitalio.DigitalInOut(board.D10)
     srcs = digitalio.DigitalInOut(board.D6)  # can be None to use internal memory
     rst = None  # digitalio.DigitalInOut(board.D8)  # can be None to not use this pin
@@ -39,7 +45,7 @@ def initialize_display():
     display = Adafruit_SSD1680(
         122,
         250,  # 2.13" HD mono display
-        spi,
+        spi_bus,
         cs_pin=ecs,
         dc_pin=dc,
         sramcs_pin=srcs,
@@ -78,10 +84,22 @@ def reset_sleep_memory(
     )
 
 
+# print("Reset reason: ", microcontroller.cpu.reset_reason)
+print("wake_alarm: ", alarm.wake_alarm)
 disable_led(board.NEOPIXEL)
 
-# Temporary workaround for light sleep.
-memory = [None for i in range(602)]
+spi_bus = board.SPI()
+
+cs = digitalio.DigitalInOut(board.D5)
+fram = adafruit_fram.FRAM_SPI(spi_bus, cs)
+
+assert struct.calcsize(STRUCT_FORMAT) <= len(fram)
+
+memory = [0 for i in range(602)]
+if not FIRST_WAKE:
+    memory = list(
+        struct.unpack(STRUCT_FORMAT, fram[0 : struct.calcsize(STRUCT_FORMAT) - 1])
+    )
 
 relative_humidity_values = memory[1:301]  # alarm.sleep_memory[1:301]
 temperature_values = memory[302:602]  # alarm.sleep_memory[302:602]
@@ -90,64 +108,65 @@ relative_humidity_index = memory[0]  # alarm.sleep_memory[0]
 temperature_index = memory[301]  # alarm.sleep_memory[301]
 
 # Zero the memory if we haven't slept yet.
-# if not alarm.wake_alarm:
-(
-    memory[0],
-    relative_humidity_values,
-    memory[301],
-    temperature_values,
-) = reset_sleep_memory(
-    memory[0], relative_humidity_values, memory[301], temperature_values
-)
+if FIRST_WAKE:
+    (
+        memory[0],
+        relative_humidity_values,
+        memory[301],
+        temperature_values,
+    ) = reset_sleep_memory(
+        memory[0], relative_humidity_values, memory[301], temperature_values
+    )
 
-display = initialize_display()
+ecs = digitalio.DigitalInOut(board.D9)
+display = initialize_display(spi_bus, ecs)
+
 i2c = board.I2C()
 htu = adafruit_htu31d.HTU31D(i2c)
 
-# Temporary workaround for light sleep.
-first_run = True
-while True:
+(
+    temperature_values[memory[301]],
+    relative_humidity_values[memory[0]],
+) = htu.measurements
 
-    (
-        temperature_values[memory[301]],
+# Display initial measurements so that we don't have to wait for a full collection of samples before getting a reading.
+if FIRST_WAKE:
+    update_display(
+        display,
         relative_humidity_values[memory[0]],
-    ) = htu.measurements
+        temperature_values[memory[301]],
+    )
 
-    # Display initial measurements so that we don't have to wait for a full collection of samples before getting a reading.
-    if first_run:
-        # if not alarm.wake_alarm:
-        update_display(
-            display,
-            relative_humidity_values[memory[0]],
-            temperature_values[memory[301]],
-        )
-        first_run = False
+# Update the indices.
+# alarm.sleep_memory[0] = relative_humidity_index + 1
+# alarm.sleep_memory[301] = temperature_index + 1
+memory[0] += 1
+memory[301] += 1
 
-    # Update the indices.
-    # alarm.sleep_memory[0] = relative_humidity_index + 1
-    # alarm.sleep_memory[301] = temperature_index + 1
-    memory[0] += 1
-    memory[301] += 1
+# Update the display if finished taking samples.
+if memory[0] >= NUMBER_OF_SAMPLES:
+    median_relative_humidity = median(relative_humidity_values)
+    median_temperature = median(temperature_values)
 
-    # Update the display if finished taking samples.
-    if memory[0] >= NUMBER_OF_SAMPLES:
-        median_relative_humidity = median(relative_humidity_values)
-        median_temperature = median(temperature_values)
+    print("Temperature: %0.1f C" % median_temperature)
+    print("Humidity: %0.1f %%" % median_relative_humidity)
+    print("")
 
-        print("Temperature: %0.1f C" % median_temperature)
-        print("Humidity: %0.1f %%" % median_relative_humidity)
-        print("")
+    update_display(display, median_relative_humidity, median_temperature)
+    (
+        memory[0],
+        relative_humidity_values,
+        memory[301],
+        temperature_values,
+    ) = reset_sleep_memory(
+        memory[0], relative_humidity_values, memory[301], temperature_values
+    )
 
-        update_display(display, median_relative_humidity, median_temperature)
-        (
-            memory[0],
-            relative_humidity_values,
-            memory[301],
-            temperature_values,
-        ) = reset_sleep_memory(
-            memory[0], relative_humidity_values, memory[301], temperature_values
-        )
+fram = struct.pack("i", memory[0])
+fram += struct.pack("d" * 300, *memory[1:301])
+fram += struct.pack("i", memory[301])
+fram += struct.pack("d" * 300, *memory[302:601])
 
-    # todo Deep sleep for 1 second.
-    al = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 1)
-    alarm.light_sleep_until_alarms(al)
+# todo Deep sleep for 1 second.
+al = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 1)
+alarm.exit_and_deep_sleep_until_alarms(al)

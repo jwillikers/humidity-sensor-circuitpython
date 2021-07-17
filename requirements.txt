@@ -1,5 +1,6 @@
 adafruit-blinka
 adafruit-circuitpython-busdevice
 adafruit-circuitpython-epd
+adafruit-circuitpython-fram
 adafruit-circuitpython-framebuf
 adafruit-circuitpython-htu31d

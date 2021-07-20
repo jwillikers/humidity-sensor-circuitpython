@@ -22,6 +22,7 @@
         "ifndef",
         "microcontroller",
         "microcontrollers",
+        "minipip",
         "pylint",
         "repos",
         "sramcs",

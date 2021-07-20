@@ -11,10 +11,9 @@ ifdef::env-github[]
 endif::[]
 :Adafruit-Feather-RP2040: https://learn.adafruit.com/adafruit-feather-rp2040-pico[Adafruit Feather RP2040]
 :CircuitPython: https://circuitpython.org/[CircuitPython]
+:minipip: https://github.com/aivarannamaa/minipip[minipip]
 
 image:https://img.shields.io/github/workflow/status/jwillikers/humidity-sensor-circuitpython/CI[GitHub Workflow Status]
-
-// todo Port to C++ and eventually Rust.
 
 A simple humidity sensor using the {Adafruit-Feather-RP2040}, monochrome eInk Display FeatherWing, and HTU31D humidity sensor, written in {CircuitPython}.
 
@@ -132,7 +131,14 @@ This is mounted at `/run/media/jordan/CIRCUITPY` on my machine.
 git -C ~/Projects clone https://github.com/jwillikers/humidity-sensor-circuitpython.git
 ----
 
-. Use the `deploy.fish` shell script to download and install necessary dependencies and the `code.py` source code file to the Feather RP2040.
+. Install the necessary libraries on the microcontroller using {minipip}.
++
+[source,sh]
+----
+minipip install -t /run/media/$USER/CIRCUITPY/lib -r requirements-circuitpython.txt
+----
+
+. Use the `deploy.fish` shell script to download and install the required font and the `code.py` source code file to the Feather RP2040.
 +
 [source,sh]
 ----
@@ -210,6 +216,7 @@ Several of these projects are enumerated below.
 * {CircuitPython}
 * https://git-scm.com/[Git]
 * https://www.linuxfoundation.org/[Linux]
+* {minipip}
 * https://www.python.org/[Python]
 * https://rouge.jneen.net/[Rouge]
 * https://www.ruby-lang.org/en/[Ruby]

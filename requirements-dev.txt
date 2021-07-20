@@ -1,3 +1,5 @@
 black
+minipip
 pre-commit
 pylint
+wheel

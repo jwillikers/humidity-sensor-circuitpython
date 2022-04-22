@@ -17,6 +17,7 @@
         "gsub",
         "ifdef",
         "ifndef",
+        "inplace",
         "microcontroller",
         "microcontrollers",
         "minipip",

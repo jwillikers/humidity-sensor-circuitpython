@@ -1,0 +1,10 @@
+adafruit-circuitpython-busdevice==5.1.8 \
+    --hash=sha256:fc9717e8d053ab0168e04eaae4b6ace3023baef1e7046a8b72ff54eb512963aa
+adafruit-circuitpython-epd==2.10.2 \
+    --hash=sha256:97c8390e48615c2a95b58739c86a84c835cf6e33d044296d2d76a5e0ba4c1c16
+adafruit-circuitpython-framebuf==1.4.9 \
+    --hash=sha256:801f421406c120bf2da01498f77aee723d616899523f976cfecb8faa3d93b992
+adafruit-circuitpython-htu31d==1.1.3 \
+    --hash=sha256:088eedbff323fa59640906bcba56cb956ca4930cca470d1414ef003e88c1db0e
+adafruit-circuitpython-typing==1.5.0 \
+    --hash=sha256:b618d8528264035e3c103b700a6b3b0615109d2b7dada38c8ca1cec231b4b2be

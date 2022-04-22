@@ -18,6 +18,7 @@ endif::[]
 :fish: https://fishshell.com/[fish]
 :Git: https://git-scm.com/[Git]
 :Linux: https://www.linuxfoundation.org/[Linux]
+:pip-tools: https://github.com/jazzband/pip-tools[pip-tools]
 :pipkin: https://github.com/aivarannamaa/pipkin[pipkin]
 :pre-commit: https://pre-commit.com/[pre-commit]
 :Python: https://www.python.org/[Python]
@@ -180,7 +181,7 @@ udisksctl mount -b /dev/sda1
 +
 [,sh]
 ----
-pipkin -m /run/media/$USER/CIRCUITPY install -r requirements.txt
+pipkin -m /run/media/$USER/CIRCUITPY install --compile -r requirements-circuitpython.txt
 ----
 
 . Use the `deploy.fish` shell script to download and install the required font bitmap and the `code.py` source code file to the Feather RP2040.
@@ -215,12 +216,21 @@ It's recommended to use the provided {pre-commit} checks when developing.
 source .env/bin/activate.fish
 ----
 
-. Install the packages available for CPython directly on your computer.
-This enables tools and editors to better verify that the libraries are being used properly.
+. Install the development packages.
 +
 [,sh]
 ----
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
+----
+
+. Install the packages available for CPython directly on your computer.
+This enables tools and editors to better verify that the libraries are being used properly.
+This project uses pip-tools to synchronize virtual environments for development.
+Sync your virtual environments packages with those pinned in the `requirements.txt` and `requirements-dev.txt` files with the `pip-sync` command.
++
+[,sh]
+----
+pip-sync requirements-dev.txt requirements.txt
 ----
 
 . Install the Git hooks for pre-commit.
@@ -228,6 +238,50 @@ python -m pip install -r requirements.txt
 [,sh]
 ----
 pre-commit install
+----
+
+. Upgrade the packages pinned in the `requirements.txt` file with the `pip-compile` command.
++
+[,sh]
+----
+pip-compile \
+  --allow-unsafe \
+  --generate-hashes \
+  --reuse-hashes \
+  --upgrade \
+  requirements.in
+----
+
+. The pinned development packages in the `requirements-dev.txt` file can be upgraded in the same fashion.
++
+[,sh]
+----
+pip-compile \
+  --allow-unsafe \
+  --generate-hashes \
+  --reuse-hashes \
+  --upgrade \
+  requirements-dev.in
+----
+
+. Update the CircuitPython dependencies in `requirements-circuitpython.txt` by running the `pip-compile` command and removing all the dependencies that don't contain `adafruit-circuitpython` in the name.
+The following command will do all of this with the help of a couple command-line options and Awk.
++
+[,sh]
+----
+pip-compile \
+    --allow-unsafe \
+    --generate-hashes \
+    --no-annotate \
+    --no-header \
+    --output-file requirements-circuitpython.txt \
+    --reuse-hashes \
+    --upgrade \
+    requirements.in; \
+  and awk \
+    -i inplace \
+    '/adafruit-circuitpython/{c=2} c&&c--' \
+    requirements-circuitpython.txt
 ----
 
 == Documentation
@@ -256,6 +310,7 @@ Several of these projects are enumerated below.
 * {fish}
 * {Git}
 * {Linux}
+* {pip-tools}
 * {pipkin}
 * {pre-commit}
 * {Python}

@@ -15,6 +15,24 @@ repos:
     hooks:
       - id: black
         language_version: python3
+  - repo: https://github.com/jazzband/pip-tools
+    rev: 6.6.0
+    hooks:
+      - id: pip-compile
+        name: pip-compile setup.py
+        args: 
+          - --allow-unsafe
+          - --generate-hashes
+          - --reuse-hashes
+        files: ^(setup\.py|requirements\.txt)$
+      - id: pip-compile
+        name: pip-compile requirements-dev.in
+        args: 
+          - --allow-unsafe
+          - --generate-hashes
+          - --reuse-hashes
+          - requirements-dev.in
+        files: ^requirements-dev\.(in|txt)$
   - repo: https://github.com/PyCQA/pylint
     rev: v2.13.7
     hooks:

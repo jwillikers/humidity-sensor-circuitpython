@@ -18,6 +18,7 @@
         "ifdef",
         "ifndef",
         "inplace",
+        "ladyada",
         "microcontroller",
         "microcontrollers",
         "minipip",

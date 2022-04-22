@@ -17,14 +17,14 @@ if set -q _flag_directory
 end
 
 set -l script_directory (dirname (status --current-filename))
-set -l ciruitpython_requirements (cat $script_directory/requirements-circuitpython.txt)
+set -l requirements (cat $script_directory/requirements.txt)
 set -l tmp_dir (mktemp tmp.XXXXXXXXXX -ut)
 
 mkdir -p $directory/lib
 or exit
 
 # Install the font bitmap, font5x8.bin, from the framebuf library.
-string match -qr 'framebuf>=(?<framebuf_version>[0-9].[0-9].[0-9])' $ciruitpython_requirements
+string match -qr 'framebuf>=(?<framebuf_version>[0-9].[0-9].[0-9])' $requirements
 wget -qO - https://api.github.com/repos/adafruit/Adafruit_CircuitPython_framebuf/releases/tags/$framebuf_version \
     | string match --quiet --regex '"browser_download_url": "(?<download_url>.*-examples-[0-9]+\.[0-9]+\.[0-9]\.zip)"'
 wget -qLP $tmp_dir $download_url

@@ -9,11 +9,21 @@ ifdef::env-github[]
 :caution-caption: :fire:
 :warning-caption: :warning:
 endif::[]
+:Adafruit-CircuitPython-framebuf: https://github.com/adafruit/Adafruit_CircuitPython_framebuf[Adafruit CircuitPython framebuf]
 :Adafruit-Feather-RP2040: https://learn.adafruit.com/adafruit-feather-rp2040-pico[Adafruit Feather RP2040]
+:Asciidoctor_: https://asciidoctor.org/[Asciidoctor]
 :CircuitPython: https://circuitpython.org/[CircuitPython]
-:minipip: https://github.com/aivarannamaa/minipip[minipip]
+:Fedora: https://getfedora.org/[Fedora]
+:Fedora-Silverblue: https://silverblue.fedoraproject.org/[Fedora Silverblue]
+:fish: https://fishshell.com/[fish]
+:Git: https://git-scm.com/[Git]
+:Linux: https://www.linuxfoundation.org/[Linux]
+:pipkin: https://github.com/aivarannamaa/pipkin[pipkin]
+:pre-commit: https://pre-commit.com/[pre-commit]
+:Python: https://www.python.org/[Python]
 
-image:https://img.shields.io/github/workflow/status/jwillikers/humidity-sensor-circuitpython/CI[GitHub Workflow Status]
+image:https://github.com/jwillikers/humidity-sensor-circuitpython/workflows/CI/badge.svg["Build Status", link="https://github.com/jwillikers/humidity-sensor-circuitpython/actions?query=workflow%3ACI"]
+image:https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white[pre-commit, link=https://github.com/pre-commit/pre-commit]
 
 A simple humidity sensor using the {Adafruit-Feather-RP2040}, monochrome eInk Display FeatherWing, and HTU31D humidity sensor, written in {CircuitPython}.
 
@@ -73,22 +83,21 @@ If values must be stored in non-volatile memory, consider using an FRAM breakout
 - [ ] Cut the line to the LED on the humidity sensor breakout.
 
 Deployment::
-The compiled `.mpy` files deployed using the `deploy.fish` script may be out-of-date and incompatible with the target CircuitPython version.
-It would probably be best to just build these from source for the target version.
-Deployment also copies unnecessary EPD drivers to the Feather RP2040.
-The deploy script should be improved by adding functions and additional support for installing only the necessary libraries.
+The required libraries are deployed with {pipkin}.
+The required font bitmap used by this project is from the {Adafruit-CircuitPython-framebuf} example.
+The `deploy.fish` fish shell script downloads and deploys the font bitmap from the example along with the `code.py` file. 
 
 == Getting Started
 
 The instructions here setup the software for the Feather RP2040.
 It is assumed that you are on and familiar with Linux and using CircuitPython on microcontrollers.
-Fedora Silverblue 34 is used as the reference operating system and the shell used is fish.
+{Fedora-Silverblue} 36 is used as the reference operating system and the {fish} shell is used.
 
 [TIP]
 ====
 To access the serial connection to the Feather RP2040 without requiring superuser privileges, add your user to the `dialout` group.
 
-[source,sh]
+[,sh]
 ----
 sudo usermod -a -G dialout $USER
 ----
@@ -96,12 +105,13 @@ sudo usermod -a -G dialout $USER
 Now restart for the change to take effect.
 ====
 
-. First, configure the RP2040 Feather for CircuitPython by installing the latest U2F bootloader, at least version 7.0.0-alpha.4.
+. First, configure the Feather RP2040 for CircuitPython by installing the latest UF2 bootloader.
+This project was last tested with version 7.2.5 of CircuitPython.
 The CircuitPython bootloader for the Feather RP2040 is available on the https://circuitpython.org/board/adafruit_feather_rp2040/[CircuitPython Adafruit Feather RP2040 page].
 +
-[source,sh]
+[,sh]
 ----
-wget -qLP ~/Downloads https://downloads.circuitpython.org/bin/adafruit_feather_rp2040/en_US/adafruit-circuitpython-adafruit_feather_rp2040-en_US-7.0.0-alpha.4.uf2
+wget -qLP ~/Downloads https://downloads.circuitpython.org/bin/adafruit_feather_rp2040/en_US/adafruit-circuitpython-adafruit_feather_rp2040-en_US-7.2.5.uf2
 ----
 
 . Hold down the button marked _bootsel_ on the Feather RP2040 while plugging it in to your computer with a USB-C cable.
@@ -109,16 +119,16 @@ The RP2040 should automatically be mounted as a disk on your computer.
 In my case, it has been mounted at `/run/media/jordan/RPI-RP2`.
 The lsblk command can be used to find where it has been mounted
 +
-[source,sh]
+[,sh]
 ----
 lsblk
 ----
 
 . Now copy over the U2F bootloader to the RP2040.
 +
-[source,sh]
+[,sh]
 ----
-cp ~/Downloads/adafruit-circuitpython-adafruit_feather_rp2040-en_US-7.0.0-alpha.4.uf2 /run/media/$USER/RPI-RP2
+cp ~/Downloads/adafruit-circuitpython-adafruit_feather_rp2040-en_US-7.2.5.uf2 /run/media/$USER/RPI-RP2
 ----
 
 . Wait for the file to finish copying, after which the Feather RP2040's onboard storage should automatically be mounted.
@@ -126,46 +136,81 @@ This is mounted at `/run/media/jordan/CIRCUITPY` on my machine.
 
 . Clone this project's repository.
 +
-[source,sh]
+[,sh]
 ----
-git -C ~/Projects clone https://github.com/jwillikers/humidity-sensor-circuitpython.git
+git clone https://github.com/jwillikers/humidity-sensor-circuitpython.git
 ----
 
-. Install the necessary libraries on the microcontroller using {minipip}.
+. Change to the project's root directory. 
 +
-[source,sh]
+[,sh]
 ----
-minipip install -t /run/media/$USER/CIRCUITPY/lib -r requirements-circuitpython.txt
+cd humidity-sensor-circuitpython
 ----
-
-. Use the `deploy.fish` shell script to download and install the required font and the `code.py` source code file to the Feather RP2040.
-+
-[source,sh]
-----
-~/Projects/humidity-sensor-circuitpython/deploy.fish
-----
-
-. Eject the Feather RP2040 from the computer when you're ready to remove it from your computer.
-+
-[source,sh]
-----
-udisksctl unmount -b (findmnt -n -o SOURCE --target /run/media/$USER/CIRCUITPY)
-----
-
-== Development
-
-It's recommended to create a virtual environment for the project and to use the provided {pre-commit} checks when developing.
 
 . Create a virtual environment for the project.
 +
-[source,sh]
+[,sh]
 ----
 python -m venv .env
 ----
 
 . Activate the virtual environment.
 +
-[source,sh]
+[,sh]
+----
+source .env/bin/activate.fish
+----
+
+. Install the development dependencies.
++
+[,sh]
+----
+python -m pip install -r requirements-dev.txt
+----
+
+. Mount the Feather RP2040 if needed.
++
+[,sh]
+----
+udisksctl mount -b /dev/sda1
+----
+
+. Install the necessary libraries on the microcontroller using {pipkin}.
++
+[,sh]
+----
+pipkin -m /run/media/$USER/CIRCUITPY install -r requirements.txt
+----
+
+. Use the `deploy.fish` shell script to download and install the required font bitmap and the `code.py` source code file to the Feather RP2040.
++
+[,sh]
+----
+fish deploy.fish
+----
+
+. Eject the Feather RP2040 from the computer when you're ready to remove it from your computer.
++
+[,sh]
+----
+udisksctl unmount -b (findmnt -n -o SOURCE --target /run/media/$USER/CIRCUITPY)
+----
+
+. Exit the project's virtual environment.
++
+[,sh]
+----
+exit
+----
+
+== Development
+
+It's recommended to use the provided {pre-commit} checks when developing.
+
+. Activate the virtual environment.
++
+[,sh]
 ----
 source .env/bin/activate.fish
 ----
@@ -173,22 +218,14 @@ source .env/bin/activate.fish
 . Install the packages available for CPython directly on your computer.
 This enables tools and editors to better verify that the libraries are being used properly.
 +
-[source,sh]
+[,sh]
 ----
-pip install -r requirements.txt
-----
-
-. Install the development dependencies.
-+
-[source,sh]
-----
-pip install -r requirements-dev.txt
+python -m pip install -r requirements.txt
 ----
 
 . Install the Git hooks for pre-commit.
-.
 +
-[source,sh]
+[,sh]
 ----
 pre-commit install
 ----
@@ -212,14 +249,16 @@ Make sure to adhere to the project's link:CODE_OF_CONDUCT.adoc[Code of Conduct].
 This project is built on the hard work of countless open source contributors.
 Several of these projects are enumerated below.
 
-* https://asciidoctor.org/[Asciidoctor]
+* {Asciidoctor_}
 * {CircuitPython}
-* https://git-scm.com/[Git]
-* https://www.linuxfoundation.org/[Linux]
-* {minipip}
-* https://www.python.org/[Python]
-* https://rouge.jneen.net/[Rouge]
-* https://www.ruby-lang.org/en/[Ruby]
+* {Fedora}
+* {Fedora-Silverblue}
+* {fish}
+* {Git}
+* {Linux}
+* {pipkin}
+* {pre-commit}
+* {Python}
 
 == Code of Conduct
 
@@ -229,7 +268,7 @@ Refer to the project's link:CODE_OF_CONDUCT.adoc[Code of Conduct] for details.
 
 This repository is licensed under the https://www.gnu.org/licenses/gpl-3.0.html[GPLv3], a copy of which is provided link:LICENSE.adoc[here].
 
-© 2021 Jordan Williams
+© 2021-2022 Jordan Williams
 
 == Authors
 

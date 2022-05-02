@@ -18,6 +18,7 @@ endif::[]
 :fish: https://fishshell.com/[fish]
 :Git: https://git-scm.com/[Git]
 :Linux: https://www.linuxfoundation.org/[Linux]
+:MicroPython: https://micropython.org/[MicroPython]
 :pip-tools: https://github.com/jazzband/pip-tools[pip-tools]
 :pipkin: https://github.com/aivarannamaa/pipkin[pipkin]
 :pre-commit: https://pre-commit.com/[pre-commit]
@@ -26,7 +27,7 @@ endif::[]
 image:https://github.com/jwillikers/humidity-sensor-circuitpython/workflows/CI/badge.svg["Build Status", link="https://github.com/jwillikers/humidity-sensor-circuitpython/actions?query=workflow%3ACI"]
 image:https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white[pre-commit, link=https://github.com/pre-commit/pre-commit]
 
-A simple humidity sensor using the {Adafruit-Feather-RP2040}, monochrome eInk Display FeatherWing, and HTU31D humidity sensor, written in {CircuitPython}.
+A simple humidity sensor using the {Adafruit-Feather-RP2040}, monochrome eInk Display FeatherWing, and HTU31D humidity sensor, written in {MicroPython}.
 
 ifdef::env-github[]
 ++++
@@ -108,11 +109,11 @@ Now restart for the change to take effect.
 
 . First, configure the Feather RP2040 for CircuitPython by installing the latest UF2 bootloader.
 This project was last tested with version 7.2.5 of CircuitPython.
-The CircuitPython bootloader for the Feather RP2040 is available on the https://circuitpython.org/board/adafruit_feather_rp2040/[CircuitPython Adafruit Feather RP2040 page].
+The CircuitPython bootloader for the Feather RP2040 is available on the https://micropython.org/download/ADAFRUIT_FEATHER_RP2040/[Feather RP2040 MicroPython Download page].
 +
 [,sh]
 ----
-wget -qLP ~/Downloads https://downloads.circuitpython.org/bin/adafruit_feather_rp2040/en_US/adafruit-circuitpython-adafruit_feather_rp2040-en_US-7.2.5.uf2
+wget -qLP ~/Downloads https://micropython.org/resources/firmware/ADAFRUIT_FEATHER_RP2040-20220117-v1.18.uf2
 ----
 
 . Hold down the button marked _bootsel_ on the Feather RP2040 while plugging it in to your computer with a USB-C cable.
@@ -125,15 +126,37 @@ The lsblk command can be used to find where it has been mounted
 lsblk
 ----
 
-. Now copy over the U2F bootloader to the RP2040.
+. Now copy over the UF2 bootloader to the RP2040.
 +
 [,sh]
 ----
-cp ~/Downloads/adafruit-circuitpython-adafruit_feather_rp2040-en_US-7.2.5.uf2 /run/media/$USER/RPI-RP2
+cp ~/Downloads/ADAFRUIT_FEATHER_RP2040-20220117-v1.18.uf2 /run/media/$USER/RPI-RP2/
 ----
 
-. Wait for the file to finish copying, after which the Feather RP2040's onboard storage should automatically be mounted.
-This is mounted at `/run/media/jordan/CIRCUITPY` on my machine.
+. Wait for the file to finish copying.
+When it is done, a serial console will become available which provides access to the QT Py RP2040.
+This serial port can be found with the `dmesg` command as follows.
++
+--
+[source,sh]
+----
+dmesg | tail
+[  443.276661] usb 1-4.3.2: reset high-speed USB device number 22 using xhci_hcd
+[ 2180.628239] usb 1-3.2: USB disconnect, device number 10
+[ 4242.965271] usb 1-3.1: USB disconnect, device number 6
+[ 4245.247932] usb 1-3.1: new full-speed USB device number 23 using xhci_hcd
+[ 4245.387678] usb 1-3.1: New USB device found, idVendor=2e8a, idProduct=0005, bcdDevice= 1.00
+[ 4245.387681] usb 1-3.1: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[ 4245.387682] usb 1-3.1: Product: Board in FS mode
+[ 4245.387683] usb 1-3.1: Manufacturer: MicroPython
+[ 4245.387684] usb 1-3.1: SerialNumber: df6050788b1e1c2e
+[ 4245.397678] cdc_acm 1-3.1:1.0: ttyACM0: USB ACM device
+----
+
+`ttyACM0` in the preceding output indicates the device node.
+This device resides under `/dev` on the filesystem.
+Note the name of the device shown in your output, since it will be used to copy the source code to the QT Py's on-board filesystem.
+--
 
 . Clone this project's repository.
 +
@@ -146,7 +169,7 @@ git clone https://github.com/jwillikers/humidity-sensor-circuitpython.git
 +
 [,sh]
 ----
-cd humidity-sensor-circuitpython
+cd humidity-sensor-micropython
 ----
 
 . Create a virtual environment for the project.
@@ -170,32 +193,25 @@ source .env/bin/activate.fish
 python -m pip install -r requirements-dev.txt
 ----
 
-. Mount the Feather RP2040 if needed.
-+
-[,sh]
-----
-udisksctl mount -b /dev/sda1
-----
-
 . Install the necessary libraries on the microcontroller using {pipkin}.
 +
 [,sh]
 ----
-pipkin -m /run/media/$USER/CIRCUITPY install --compile -r requirements-circuitpython.txt
+pipkin -p /dev/ttyACM0 install --compile -r requirements-circuitpython.txt
 ----
 
-. Copy the required font bitmap and the `code.py` source code file to the Feather RP2040.
+. Download the MicroPython `pyboard.py` script for accessing the QT Py RP2040.
 +
 [,sh]
 ----
-cp code.py font/font5x8.bin /run/media/$USER/CIRCUITPY
+wget -L https://raw.githubusercontent.com/micropython/micropython/master/tools/pyboard.py
 ----
 
-. Eject the Feather RP2040 from the computer when you're ready to remove it from your computer.
+. Copy the `main.py` source code file to the QT Py RP2040.
 +
 [,sh]
 ----
-udisksctl unmount -b (findmnt -n -o SOURCE --target /run/media/$USER/CIRCUITPY)
+python pyboard.py --device /dev/ttyACM0 -f cp main.py font/font5x8.bin :
 ----
 
 . Exit the project's virtual environment.
@@ -280,7 +296,7 @@ pip-compile \
     requirements.in; \
   and awk \
     -i inplace \
-    '/adafruit-circuitpython/{c=2} c&&c--' \
+    '/adafruit-circuitpython/ || /adafruit-blinka/ {c=2} c&&c--' \
     requirements-circuitpython.txt
 ----
 
@@ -292,6 +308,9 @@ pip-compile \
 * https://circuitpython.readthedocs.io/projects/framebuf/en/latest/[framebuf]
 * https://circuitpython.readthedocs.io/projects/htu31d/en/latest/[htu31d]
 * https://circuitpython.readthedocs.io/en/latest/shared-bindings/neopixel_write/index.html[neopixel_write]
+
+.MicroPython Documentation
+* https://docs.micropython.org/en/latest/rp2/quickref.html
 
 == Contributing
 
@@ -309,6 +328,7 @@ Several of these projects are enumerated below.
 * {Fedora-Silverblue}
 * {fish}
 * {Git}
+* {MicroPython}
 * {Linux}
 * {pip-tools}
 * {pipkin}

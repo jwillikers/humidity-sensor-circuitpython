@@ -4,3 +4,4 @@ pip-tools
 pipkin
 pre-commit
 pylint
+pyserial

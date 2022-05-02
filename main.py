@@ -1,9 +1,10 @@
 import time
-import alarm
+# import alarm
 import board
 import busio
 import digitalio
-import neopixel_write
+from machine import Pin, I2C, SPI
+from neopixel import NeoPixel
 import adafruit_htu31d
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.ssd1680 import Adafruit_SSD1680  # pylint: disable=unused-import
@@ -13,10 +14,10 @@ NUMBER_OF_SAMPLES = 300
 
 
 def disable_led(led_pin):
-    pin = digitalio.DigitalInOut(led_pin)
-    pin.direction = digitalio.Direction.OUTPUT
+    neopixel = NeoPixel(led_pin, 1)
     pixel_off = bytearray([0, 0, 0])
-    neopixel_write.neopixel_write(pin, pixel_off)
+    neopixel[0] = pixel_off
+    neopixel.write()
 
 
 def median(numbers):
@@ -27,9 +28,8 @@ def median(numbers):
 def zero_values(values):
     return [None for i in range(len(values))]
 
-
 def initialize_display():
-    spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+    spi = busio.SPI(board.GP18, board.GP19, board.GP20)
     ecs = digitalio.DigitalInOut(board.D9)
     dc = digitalio.DigitalInOut(board.D10)
     srcs = digitalio.DigitalInOut(board.D6)  # can be None to use internal memory
@@ -78,7 +78,8 @@ def reset_sleep_memory(
     )
 
 
-disable_led(board.NEOPIXEL)
+led_pin = Pin(16, Pin.OUT)
+disable_led(led_pin)
 
 # Temporary workaround for light sleep.
 memory = [None for i in range(602)]
@@ -101,7 +102,7 @@ temperature_index = memory[301]  # alarm.sleep_memory[301]
 )
 
 display = initialize_display()
-i2c = board.I2C()
+i2c = busio.I2C(Pin(3), Pin(2))
 htu = adafruit_htu31d.HTU31D(i2c)
 
 # Temporary workaround for light sleep.
@@ -149,5 +150,6 @@ while True:
         )
 
     # todo Deep sleep for 1 second.
-    al = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 1)
-    alarm.light_sleep_until_alarms(al)
+    time.sleep(1)
+    # al = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 1)
+    # alarm.light_sleep_until_alarms(al)

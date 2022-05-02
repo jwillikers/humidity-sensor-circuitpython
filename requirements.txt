@@ -4,8 +4,8 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes requirements.in
 #
-adafruit-blinka==7.2.1 \
-    --hash=sha256:e4c97d0bcc4b87656f34864772ef67be2fe20e38826bd5932adeb343e207be71
+adafruit-blinka==7.2.2 \
+    --hash=sha256:fa34afeac19a29d9cff72808eb85c5cd5b16cf94f6ad7e57004a20f547fc3c1b
     # via
     #   adafruit-circuitpython-busdevice
     #   adafruit-circuitpython-epd
@@ -14,7 +14,6 @@ adafruit-blinka==7.2.1 \
 adafruit-circuitpython-busdevice==5.1.8 \
     --hash=sha256:fc9717e8d053ab0168e04eaae4b6ace3023baef1e7046a8b72ff54eb512963aa
     # via
-    #   -r requirements.in
     #   adafruit-circuitpython-epd
     #   adafruit-circuitpython-htu31d
     #   adafruit-circuitpython-typing
@@ -29,8 +28,8 @@ adafruit-circuitpython-framebuf==1.4.9 \
 adafruit-circuitpython-htu31d==1.1.3 \
     --hash=sha256:088eedbff323fa59640906bcba56cb956ca4930cca470d1414ef003e88c1db0e
     # via -r requirements.in
-adafruit-circuitpython-typing==1.5.0 \
-    --hash=sha256:b618d8528264035e3c103b700a6b3b0615109d2b7dada38c8ca1cec231b4b2be
+adafruit-circuitpython-typing==1.6.0 \
+    --hash=sha256:f534ac8fc774a4c5336e4a056dd75bb83e0e7672b5688a9dde53e3faa27fde46
     # via adafruit-circuitpython-busdevice
 adafruit-platformdetect==3.22.1 \
     --hash=sha256:7ce06cd1a3de908be9c1bad8c73875c33ec4286928d097b57ff3791f40c882ec

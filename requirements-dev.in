@@ -3,3 +3,4 @@ pip-tools
 pipkin
 pre-commit
 ruff
+yamllint

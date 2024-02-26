@@ -8,7 +8,7 @@ format:
     just --fmt --unstable
 
 init:
-    [ -d venv ] || python -m venv --system-site-packages venv
+    [ -d venv ] || python -m venv venv
     venv/bin/python -m pip install -r requirements-dev.txt
     venv/bin/pre-commit install
 

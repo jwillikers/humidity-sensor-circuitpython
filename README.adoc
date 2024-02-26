@@ -25,6 +25,7 @@ endif::[]
 
 image:https://github.com/jwillikers/humidity-sensor-circuitpython/workflows/CI/badge.svg["Build Status", link="https://github.com/jwillikers/humidity-sensor-circuitpython/actions?query=workflow%3ACI"]
 image:https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white[pre-commit, link=https://github.com/pre-commit/pre-commit]
+image:https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json[Ruff, link=https://github.com/astral-sh/ruff]
 
 A simple humidity sensor using the {Adafruit-Feather-RP2040}, monochrome eInk Display FeatherWing, and HTU31D humidity sensor, written in {CircuitPython}.
 
@@ -142,7 +143,7 @@ This is mounted at `/run/media/jordan/CIRCUITPY` on my machine.
 git clone https://github.com/jwillikers/humidity-sensor-circuitpython.git
 ----
 
-. Change to the project's root directory. 
+. Change to the project's root directory.
 +
 [,sh]
 ----
@@ -153,14 +154,14 @@ cd humidity-sensor-circuitpython
 +
 [,sh]
 ----
-python -m venv .env
+python -m venv venv
 ----
 
 . Activate the virtual environment.
 +
 [,sh]
 ----
-source .env/bin/activate.fish
+source venv/bin/activate.fish
 ----
 
 . Install the development dependencies.
@@ -174,7 +175,7 @@ python -m pip install -r requirements-dev.txt
 +
 [,sh]
 ----
-udisksctl mount -b /dev/sda1
+udisksctl mount --block-device /dev/sda1
 ----
 
 . Install the necessary libraries on the microcontroller using {pipkin}.
@@ -195,7 +196,7 @@ cp code.py font/font5x8.bin /run/media/$USER/CIRCUITPY
 +
 [,sh]
 ----
-udisksctl unmount -b (findmnt -n -o SOURCE --target /run/media/$USER/CIRCUITPY)
+udisksctl unmount --block-device (findmnt --noheadings --output SOURCE --target /run/media/$USER/CIRCUITPY)
 ----
 
 . Exit the project's virtual environment.
@@ -213,7 +214,7 @@ It's recommended to use the provided {pre-commit} checks when developing.
 +
 [,sh]
 ----
-source .env/bin/activate.fish
+source venv/bin/activate.fish
 ----
 
 . Install the development packages.
@@ -325,7 +326,7 @@ The font bitmap, link:font/font5x8.bin[font/font5x8.bin], is © 2021 ladyada for
 
 This repository is licensed under the https://www.gnu.org/licenses/gpl-3.0.html[GPLv3], a copy of which is provided link:LICENSE.adoc[here].
 
-© 2021-2022 Jordan Williams
+© 2021-2024 Jordan Williams
 
 == Authors
 

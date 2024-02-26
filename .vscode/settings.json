@@ -1,5 +1,4 @@
 {
-    "python.formatting.provider": "black",
     "cSpell.words": [
         "Adafruit",
         "adoc",
@@ -23,6 +22,7 @@
         "microcontrollers",
         "minipip",
         "MOSI",
+        "noheadings",
         "Optimziations",
         "pylint",
         "Qwiic",

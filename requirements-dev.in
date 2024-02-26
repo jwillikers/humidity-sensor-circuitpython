@@ -1,6 +1,5 @@
 -c requirements.txt
-black
 pip-tools
 pipkin
 pre-commit
-pylint
+ruff

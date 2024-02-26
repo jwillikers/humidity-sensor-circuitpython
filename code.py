@@ -107,7 +107,6 @@ htu = adafruit_htu31d.HTU31D(i2c)
 # Temporary workaround for light sleep.
 first_run = True
 while True:
-
     (
         temperature_values[memory[301]],
         relative_humidity_values[memory[0]],

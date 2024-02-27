@@ -17,6 +17,7 @@
         "ifdef",
         "ifndef",
         "inplace",
+        "justfile",
         "ladyada",
         "microcontroller",
         "microcontrollers",

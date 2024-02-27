@@ -19,7 +19,6 @@ endif::[]
 :pre-commit: https://pre-commit.com/[pre-commit]
 :Python: https://www.python.org/[Python]
 
-image:https://github.com/jwillikers/humidity-sensor-circuitpython/workflows/CI/badge.svg["Build Status", link="https://github.com/jwillikers/humidity-sensor-circuitpython/actions?query=workflow%3ACI"]
 image:https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white[pre-commit, link=https://github.com/pre-commit/pre-commit]
 image:https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json[Ruff, link=https://github.com/astral-sh/ruff]
 

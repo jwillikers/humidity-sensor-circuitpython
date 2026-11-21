@@ -221,7 +221,7 @@ The font bitmap, link:font/font5x8.bin[font/font5x8.bin], is © 2021 ladyada for
 
 This repository is licensed under the https://www.gnu.org/licenses/gpl-3.0.html[GPLv3], a copy of which is provided link:LICENSE.adoc[here].
 
-© 2021-2024 Jordan Williams
+© 2021-2026 Jordan Williams
 
 == Authors
 
